@@ -1,32 +1,48 @@
 #include "sort.h"
+#include <stdbool.h> /* for some reason not working when only in header */
+
 /**
- * insertion_sort_list - sorts a dlinked list of integers in ascending order
- * @list: Pointer to first node
+ * insertion_sort_list - sorts a doubly linked list of integers in ascending
+ * order using an insertion sort algorithm
+ * @list: doubly linked list of integers to be sorted
  */
 void insertion_sort_list(listint_t **list)
 {
-	listint_t *tmp;
+	listint_t *lead, *follow, *new, *temp;
 
-	if (list == NULL || *list == NULL || (*list)->next == NULL)
+	if (!list || !(*list) || !((*list)->next))
 		return;
-	tmp = (*list)->next;
-	while (tmp != NULL)
-	{
-		while ((tmp->prev != NULL) && (tmp->prev->n > tmp->n))
-		{
-			tmp->prev->next = tmp->next;
-			if (tmp->next != NULL)
-				tmp->next->prev = tmp->prev;
-			tmp->next = tmp->prev;
-			tmp->prev = tmp->prev->prev;
-			tmp->next->prev = tmp;
 
-			if (tmp->prev == NULL)
-				*list = tmp;
+	/* dance begins with 1st from house left following */
+	follow = (*list);
+	/* and next dancer to house right leading */
+	lead = (*list)->next;
+	while (lead)
+	{
+		new = lead->next;
+		while (follow && lead->n < follow->n)
+		{
+			/* lead and follow swap positions */
+			if (follow->prev)
+				follow->prev->next = lead;
 			else
-				tmp->prev->next = tmp;
+				/* if lead makes it to house left, now head */
+				*list = lead;
+			if (lead->next)
+				lead->next->prev = follow;
+			temp = lead->next;
+			lead->next = follow;
+			lead->prev = follow->prev;
+			follow->next = temp;
+			follow->prev = lead;
 			print_list(*list);
+			/* compare next pair, flowing to house left */
+			follow = lead->prev;
 		}
-		tmp = tmp->next;
+		/* lead sorted to left, new cycle starts @ right leading edge */
+		lead = new;
+		if (lead)
+			follow = lead->prev;
 	}
 }
+ 
